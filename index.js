@@ -1,6 +1,9 @@
 const express = require('express');
 const bodyparser = require('body-parser');
 const mongoose = require('mongoose');
+const NodeGeocoder = require('node-geocoder');
+const session = require('express-session');
+
 const app = express();
 const port = process.env.PORT || 3000;
 const path = require('path')
@@ -11,6 +14,16 @@ const Sensor = require('./Models/Sensors');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyparser.urlencoded({extended: false}));
 app.use(bodyparser.json());
+app.use(
+    session({
+        secret: 'secret',
+        lat:'',
+        lon:''
+    })
+  );
+  
+
+
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 const uri = `mongodb+srv://parkonthego:parkonthego@cluster0.2uafm.mongodb.net/parkonthegoDB?retryWrites=true&w=majority`;
@@ -23,6 +36,16 @@ connection.once('open', () =>{
     console.log("MongoDB database connection successfully established");
 });
 
+const options = {
+    provider: 'google',
+  
+    // Optional depending on the providers
+    
+    apiKey: 'AIzaSyBKoRGosqFTvjgbkIIdlEPfUhUYpYKCiQI', // for Mapquest, OpenCage, Google Premier
+    
+  };
+
+  
 app.get('/',function(req,res){
     res.render("home"); 
   });
@@ -39,6 +62,17 @@ res.render("form");
   app.post('/destination',function(req,res){
       console.log(req.body.Dest);
       console.log(req.body.start);
+      const geoCoder = NodeGeocoder(options);
+      
+      geoCoder.geocode(req.body.Dest)
+  .then((res)=> {
+    console.log(res[0].latitude);
+    
+  })
+  .catch((err)=> {
+    console.log(err);
+  });
+  
   })
 
 

@@ -15,6 +15,7 @@
     "express": "^4.17.3",
     "express-session": "^1.17.2",
     "mongoose": "^6.2.10",
+    "node-geocoder": "^4.0.0",
     "nodemon": "^2.0.15"
   }
 }
