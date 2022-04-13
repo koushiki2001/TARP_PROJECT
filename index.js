@@ -45,6 +45,11 @@ const options = {
     
   };
 
+function revgeocode(destination){
+  console.log("here:"+destination.latitude+" "+destination.longitude);
+  
+
+}
   
 app.get('/',function(req,res){
     res.render("home"); 
@@ -66,7 +71,9 @@ res.render("form");
       
       geoCoder.geocode(req.body.Dest)
   .then((res)=> {
-    console.log(res[0].latitude);
+    revgeocode(res[0]);
+   // console.log(res[0].latitude);
+
     
   })
   .catch((err)=> {
