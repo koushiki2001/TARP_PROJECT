@@ -45,9 +45,27 @@ const options = {
     
   };
 
+//Function to find the most feasible parking spot based on the user's current location
+function findFeasibleSpot(lat,check)
+{
+    console.log("INSIDE RETURN FUNC");
+}
+
+//function to get the sensor data
 function revgeocode(destination){
   console.log("here:"+destination.latitude+" "+destination.longitude);
-  
+  let check = [];
+  Sensor.find()
+          .then(Sensor => {
+    
+           
+            for(var i in Sensor)
+        check.push([i, Sensor [i].Latitude,Sensor [i].Longitude,Sensor[i].ID]);
+        
+        // console.log(check)
+        
+        findFeasibleSpot(destination.latitude,check);
+          })
 
 }
   
