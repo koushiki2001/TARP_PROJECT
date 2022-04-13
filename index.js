@@ -8,6 +8,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const path = require('path')
 const ejs = require("ejs");
+const turf= require('@turf/turf');
 const req = require('express/lib/request');
 const Sensor = require('./Models/Sensors');
 
@@ -46,9 +47,26 @@ const options = {
   };
 
 //Function to find the most feasible parking spot based on the user's current location
-function findFeasibleSpot(lat,check)
+function findFeasibleSpot(destination,check)
 {
     console.log("INSIDE RETURN FUNC");
+
+    var from = turf.point([Number(destination.latitude),Number(destination.longitude)]);
+    var options = {units: 'kilometers'};
+ //console.log(check[0][1]);
+    for(var i=0;i<check.length;i++){
+     var to = turf.point([Number(check[i][1]), Number(check[i][2])]);
+     var distance = turf.distance(from, to, options);
+     if(distance<=2.0){
+       console.log("close to 2 kms:"+distance+"\n");
+     }
+    //console.log(check[i].Latitude+"\n");
+     
+  
+    }
+   
+    //addToMap
+    
 }
 
 //function to get the sensor data
@@ -57,14 +75,9 @@ function revgeocode(destination){
   let check = [];
   Sensor.find()
           .then(Sensor => {
-    
-           
             for(var i in Sensor)
-        check.push([i, Sensor [i].Latitude,Sensor [i].Longitude,Sensor[i].ID]);
-        
-        // console.log(check)
-        
-        findFeasibleSpot(destination.latitude,check);
+        check.push([i, Sensor [i].Latitude,Sensor [i].Longitude,Sensor[i].ID]);        
+        findFeasibleSpot(destination,check);
           })
 
 }
