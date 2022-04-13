@@ -10,19 +10,54 @@
         <script type="text/javascript" src="map.js"></script>
         
     </head>
-    <body>
+    <body onload="getLocation()">
         <form method="post" action="/destination">
+            <input type="text" id="start" name="start" hidden>
             <div class="input-group mb-3" id="findhotels">
                 <div class="input-group-prepend">
                   <span class="input-group-text" id="basic-addon1">Enter Destination</span>
                 </div>
                 <div id="locationField">
-                <input type="text" id="autocomplete" class="form-control" placeholder="Location" aria-label="Username" aria-describedby="basic-addon1">
+                <input type="text" id="autocomplete" class="form-control" placeholder="Location" aria-label="Username" aria-describedby="basic-addon1" name="Dest">
                 </div>
             </div>
+            <button type="submit">SUBMIT</button>
         </form>
     </body>
 
+
+
+<script>
+    function getReverseGeocodingData(lat, lng) {
+        var latlng = new google.maps.LatLng(lat, lng);
+        // This is making the Geocode request
+        var geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ 'latLng': latlng }, function (results, status) {
+            if (status !== google.maps.GeocoderStatus.OK) {
+                alert(status);
+            }
+            // This is checking to see if the Geoeode Status is OK before proceeding
+            if (status == google.maps.GeocoderStatus.OK) {
+                console.log(results);
+                var address = (results[0].formatted_address);
+                document.getElementById("start").value= address;
+                return address;
+            }
+        });
+    }
+    var x = document.getElementById("start");
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+      } else {
+        x.innerHTML = "Geolocation is not supported by this browser.";
+      }
+    }
+    
+    function showPosition(position) {
+        var add= getReverseGeocodingData(position.coords.latitude, position.coords.longitude);
+    }
+</script>
 
 
 <script

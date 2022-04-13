@@ -78,11 +78,16 @@ function initMap() {
     {
       types: ["address"],
       fields: ["geometry"],
-    }
-  );
+    });
+
+   
+
+    
+  }
+  
 
 
 
   
-}
+
 
