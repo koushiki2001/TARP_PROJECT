@@ -27,7 +27,30 @@ app.use(
 
 
   var parser = parse({columns: true}, function (err, records) {
-      console.log(records);
+   
+      var int2day={
+        1:'Monday occupancy minutes',
+        2:'Tuesday occupancy minutes',
+        3:'Wednesday occupancy minutes',
+        4:'Thursday occupancy minutes',
+        5:'Friday occupancy minutes',
+        6:'Saturday occupancy minutes',
+        0:'Sunday occupancy minutes'
+      };
+      var d = new Date();
+      var n = d.getDay();
+      console.log(int2day[n]);
+
+      for(var i=0;i<records.length;i++){
+        console.log(records[i][int2day[n]]);
+      }
+      
+
+
+
+
+
+
   }); 
 
 app.set('view engine', 'ejs');
@@ -67,16 +90,15 @@ function findFeasibleSpot(destination,check)
          chosenSensors.push(check[i][3]);
        console.log("close to 2 kms:"+check[i][3]+" "+distance+"\n");
      }
-    
-     
-     
-  
     }
     console.log(chosenSensors);
 
-   
+  
+
     filepath=__dirname+"/public/static/SENSOR OCCUPANCY TARP/"+chosenSensors[0]+"_occupancy.csv";
     fs.createReadStream(filepath).pipe(parser);
+
+
     
 }
 
