@@ -1,0 +1,13 @@
+,Slots,Monday occupancy minutes,Tuesday occupancy minutes,Wednesday occupancy minutes,Thursday occupancy minutes,Friday occupancy minutes,Saturday occupancy minutes,Sunday occupancy minutes
+0,12am-2am,8,11,451,20,519,4,1099
+1,2am-4am,0,0,0,0,0,2,0
+2,4am-6am,0,0,0,0,0,51,0
+3,6am-8am,1148,211,737,115,0,742,0
+4,8am-10am,326,241,51,545,1178,1275,503
+5,10am-12pm,348,629,39,526,997,637,557
+6,12pm-2pm,158,156,167,602,357,756,490
+7,2pm-4pm,252,298,349,214,480,502,522
+8,4pm-6pm,380,72,538,811,272,203,339
+9,6pm-8pm,966,591,354,763,1499,1367,908
+10,8pm-10pm,618,436,214,76,119,682,265
+11,10pm-12am,9,0,18,300,118,222,70
