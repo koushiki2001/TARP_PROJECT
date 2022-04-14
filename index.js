@@ -1,4 +1,6 @@
 const express = require('express');
+const fs = require('fs');
+const {parse} = require('csv-parse');
 const bodyparser = require('body-parser');
 const mongoose = require('mongoose');
 const NodeGeocoder = require('node-geocoder');
@@ -22,8 +24,11 @@ app.use(
         lon:''
     })
   );
-  
 
+
+  var parser = parse({columns: true}, function (err, records) {
+      console.log(records);
+  }); 
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
@@ -51,6 +56,7 @@ function findFeasibleSpot(destination,check)
 {
     console.log("INSIDE RETURN FUNC");
 
+    var chosenSensors = [];
     var from = turf.point([Number(destination.latitude),Number(destination.longitude)]);
     var options = {units: 'kilometers'};
  //console.log(check[0][1]);
@@ -58,14 +64,19 @@ function findFeasibleSpot(destination,check)
      var to = turf.point([Number(check[i][1]), Number(check[i][2])]);
      var distance = turf.distance(from, to, options);
      if(distance<=2.0){
-       console.log("close to 2 kms:"+distance+"\n");
+         chosenSensors.push(check[i][3]);
+       console.log("close to 2 kms:"+check[i][3]+" "+distance+"\n");
      }
-    //console.log(check[i].Latitude+"\n");
+    
+     
      
   
     }
+    console.log(chosenSensors);
+
    
-    //addToMap
+    filepath=__dirname+"/public/static/SENSOR OCCUPANCY TARP/"+chosenSensors[0]+"_occupancy.csv";
+    fs.createReadStream(filepath).pipe(parser);
     
 }
 
