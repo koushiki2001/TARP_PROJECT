@@ -13,6 +13,8 @@ const ejs = require("ejs");
 const turf= require('@turf/turf');
 const req = require('express/lib/request');
 const Sensor = require('./Models/Sensors');
+const Park = require('./Models/ParkingSpots');
+const crypto = require('crypto');
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyparser.urlencoded({extended: false}));
@@ -28,14 +30,15 @@ app.use(
 
   var parser = parse({columns: true}, function (err, records) {
    
+    // console.log(records);
       var int2day={
-        1:'Monday occupancy minutes',
-        2:'Tuesday occupancy minutes',
-        3:'Wednesday occupancy minutes',
-        4:'Thursday occupancy minutes',
-        5:'Friday occupancy minutes',
-        6:'Saturday occupancy minutes',
-        0:'Sunday occupancy minutes'
+        1:'Monday Occupancy',
+        2:'Tuesday Occupancy',
+        3:'Wednesday Occupancy',
+        4:'Thursday Occupancy',
+        5:'Friday Occupancy',
+        6:'Saturday Occupancy',
+        0:'Sunday Occupancy'
       };
       var d = new Date();
       var n = d.getDay();
@@ -83,7 +86,7 @@ function findFeasibleSpot(destination,check)
 {
     console.log("INSIDE RETURN FUNC");
 
-    var chosenSensors = [];
+    var chosenParking = [];
     var from = turf.point([Number(destination.latitude),Number(destination.longitude)]);
     var options = {units: 'kilometers'};
  //console.log(check[0][1]);
@@ -91,15 +94,16 @@ function findFeasibleSpot(destination,check)
      var to = turf.point([Number(check[i][1]), Number(check[i][2])]);
      var distance = turf.distance(from, to, options);
      if(distance<=2.0){
-         chosenSensors.push(check[i][3]);
+         chosenParking.push(check[i]);
        console.log("close to 2 kms:"+check[i][3]+" "+distance+"\n");
      }
     }
-    console.log(chosenSensors);
+    console.log(chosenParking);
 
+    
   
-    for(var i=0;i<chosenSensors.length;++i){
-    filepath=__dirname+"/public/static/SENSOR OCCUPANCY TARP/"+chosenSensors[i]+"_occupancy.csv";
+    for(var i=0;i<chosenParking.length;++i){
+    filepath=__dirname+"/public/static/PARKING DATA/lat_"+chosenParking[0][1]+"_lon_"+chosenParking[0][2]+".csv";
     fs.createReadStream(filepath).pipe(parser);
     }
 
@@ -111,10 +115,10 @@ function findFeasibleSpot(destination,check)
 function revgeocode(destination){
   console.log("here:"+destination.latitude+" "+destination.longitude);
   let check = [];
-  Sensor.find()
-          .then(Sensor => {
-            for(var i in Sensor)
-        check.push([i, Sensor [i].Latitude,Sensor [i].Longitude,Sensor[i].ID]);        
+  Park.find()
+          .then(Park => {
+            for(var i in Park)
+        check.push([i, Park [i].Latitude,Park [i].Longitude,Park[i].ID,Park[i].Title]);        
         findFeasibleSpot(destination,check);
           })
 
@@ -128,6 +132,10 @@ app.get('/',function(req,res){
 app.get('/sensor',function(req,res){
 res.render("form"); 
 });
+
+app.get('/parking',function(req,res){
+  res.render("parkingDetails"); 
+  });
 
 
   app.get('/getDestination',function(req,res){
@@ -173,6 +181,20 @@ res.render("form");
     console.log(req.body);
     newSensor.save()
     .then(() => res.json('Sensor Added'))
+    .catch(err => res.status(400).json('Error: '+err));
+  });
+
+  app.post('/updateParkingData',function(req,res){
+    
+    const Title = req.body.title;
+    const ID = crypto.randomBytes(8).toString("hex");
+    const Latitude = req.body.latitude;
+    const Longitude = req.body.longitude;
+    
+    const newParking = new Park({Title,ID,Latitude,Longitude});
+    console.log(req.body);
+    newParking.save()
+    .then(() => res.json('Parking Added'))
     .catch(err => res.status(400).json('Error: '+err));
   });
 
