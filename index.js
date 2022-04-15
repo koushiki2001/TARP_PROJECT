@@ -5,7 +5,7 @@ const bodyparser = require('body-parser');
 const mongoose = require('mongoose');
 const NodeGeocoder = require('node-geocoder');
 const session = require('express-session');
-
+var distance= require('google-distance');
 const app = express();
 const port = process.env.PORT || 3000;
 const path = require('path')
@@ -44,7 +44,7 @@ app.use(
       for(var i=0;i<records.length;i++){
         console.log(records[i][int2day[n]]);
       }
-      
+
 
 
 
@@ -73,6 +73,10 @@ const options = {
     apiKey: 'AIzaSyBKoRGosqFTvjgbkIIdlEPfUhUYpYKCiQI', // for Mapquest, OpenCage, Google Premier
     
   };
+
+  var googleMapsClient = require('@google/maps').createClient({
+    key: "AIzaSyBKoRGosqFTvjgbkIIdlEPfUhUYpYKCiQI"
+  });
 
 //Function to find the most feasible parking spot based on the user's current location
 function findFeasibleSpot(destination,check)
@@ -131,6 +135,17 @@ res.render("form");
   app.post('/destination',function(req,res){
       console.log(req.body.Dest);
       console.log(req.body.start);
+      
+      googleMapsClient.directions({
+        origin: req.body.start,
+        destination: req.body.Dest,
+        mode: 'driving',
+          
+        }, function(err, response) {
+          //reaching time
+            console.log("timee:",response.json.routes[0].legs[0].duration.value/(60*60));
+
+        });  
       const geoCoder = NodeGeocoder(options);
       
       geoCoder.geocode(req.body.Dest)
