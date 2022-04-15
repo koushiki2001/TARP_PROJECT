@@ -15,6 +15,7 @@ const req = require('express/lib/request');
 const Sensor = require('./Models/Sensors');
 const Park = require('./Models/ParkingSpots');
 const crypto = require('crypto');
+var moment=require('moment');
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyparser.urlencoded({extended: false}));
@@ -152,7 +153,18 @@ app.get('/parking',function(req,res){
           
         }, function(err, response) {
           //reaching time
-            console.log("timee:",response.json.routes[0].legs[0].duration.value/(60*60));
+           // ==var dt = new Date();
+           const utc =new Date().toUTCString();
+          
+          //  d.toLocaleString("en-US", { timeZone: 'Asia/Kolkata' });
+           // dt.setSeconds( dt.getSeconds() + 10 );
+           // console.log("added sec:",dt);
+           var curtime= moment();
+           var reach_time=moment(curtime).add(Number(response.json.routes[0].legs[0].duration.value/(60*60)), 'hours').format('MMMM Do YYYY, h:mm:ss a');  // see the cloning?
+
+            // var m = moment.unix(utc).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+            console.log("asia:",reach_time);
+            //console.log("timee:",response.json.routes[0].legs[0].duration.value/(60*60));
 
         });  
       const geoCoder = NodeGeocoder(options);
