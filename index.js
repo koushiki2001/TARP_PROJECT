@@ -152,20 +152,62 @@ app.get('/parking',function(req,res){
         mode: 'driving',
           
         }, function(err, response) {
-          //reaching time
-           // ==var dt = new Date();
+          
            const utc =new Date().toUTCString();
           
-          //  d.toLocaleString("en-US", { timeZone: 'Asia/Kolkata' });
-           // dt.setSeconds( dt.getSeconds() + 10 );
-           // console.log("added sec:",dt);
-           var curtime= moment();
-           var reach_time=moment(curtime).add(Number(response.json.routes[0].legs[0].duration.value/(60*60)), 'hours').format('MMMM Do YYYY, h:mm:ss a');  // see the cloning?
 
+           var slots = {
+             0:'12am-2am',
+             1:'2am-4am',
+             2:'4am-6am',
+             3:'6am-8am',
+             4:'8am-10am',
+             5:'10am-12pm',
+             6:'12pm-2pm',
+             7:'2pm-4pm',
+             8:'4pm-6pm',
+             9:'6pm-8pm',
+             10:'8pm-10pm',
+             11:'10pm-12am'
+           }
+
+           var curtime= moment();
+           var reach_time=moment(curtime).add(Number(response.json.routes[0].legs[0].duration.value/(60*60)), 'hours').format('YYYY-MM-DD, h:mm:ss a');  // see the cloning?
+            var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+           var reach_timestamp = reach_time.split(', ')[1];
+           var reach_date = reach_time.split(', ')[0];
             // var m = moment.unix(utc).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
             console.log("asia:",reach_time);
-            //console.log("timee:",response.json.routes[0].legs[0].duration.value/(60*60));
-
+            console.log(reach_date);
+            console.log(typeof(reach_time));
+            const date = moment(reach_date);
+            const reaching_day = days[date.day()];
+            var reaching_slot;
+            if(reach_timestamp>='00:00' && reach_timestamp<='2:00')
+            reaching_slot = 0;
+            if(reach_timestamp>='2:00' && reach_timestamp<='4:00')
+            reaching_slot = 1;
+            if(reach_timestamp>='4:00' && reach_timestamp<='6:00')
+            reaching_slot = 2;
+            if(reach_timestamp>='6:00' && reach_timestamp<'8:00')
+            reaching_slot = 3;
+            if(reach_timestamp>='8:00' && reach_timestamp<'10:00')
+            reaching_slot = 4;
+            if(reach_timestamp>='10:00' && reach_timestamp<'12:00')
+            reaching_slot = 5;
+            if(reach_timestamp>='12:00' && reach_timestamp<'14:00')
+            reaching_slot = 6;
+            if(reach_timestamp>='14:00' && reach_timestamp<'16:00')
+            reaching_slot = 7;
+            if(reach_timestamp>='16:00' && reach_timestamp<'18:00')
+            reaching_slot = 8;
+            if(reach_timestamp>='18:00' && reach_timestamp<'20:00')
+            reaching_slot = 9;
+            if(reach_timestamp>='20:00' && reach_timestamp<'22:00')
+            reaching_slot = 10;
+            if(reach_timestamp>='22:00' && reach_timestamp<'00:00')
+            reaching_slot = 11;
+            console.log("The person will reach on "+reaching_day+" in the time slot "+slots[reaching_slot]);
         });  
       const geoCoder = NodeGeocoder(options);
       
