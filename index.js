@@ -98,9 +98,10 @@ function findFeasibleSpot(destination,check)
     console.log(chosenSensors);
 
   
-
-    filepath=__dirname+"/public/static/SENSOR OCCUPANCY TARP/"+chosenSensors[0]+"_occupancy.csv";
+    for(var i=0;i<chosenSensors.length;++i){
+    filepath=__dirname+"/public/static/SENSOR OCCUPANCY TARP/"+chosenSensors[i]+"_occupancy.csv";
     fs.createReadStream(filepath).pipe(parser);
+    }
 
 
     
