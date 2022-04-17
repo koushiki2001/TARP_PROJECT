@@ -292,24 +292,34 @@ app.post('/updateParkingOccupancy',function(req,res){
   .catch(err => res.status(400).json('Error: '+err));
 });
 
-  app.post('/destination',function(req,res){
+  app.post('/destination',async function(req,res){
       console.log(req.body.Dest);
       console.log(req.body.start);
 
       const geoCoder = NodeGeocoder(options);
       
       geoCoder.geocode(req.body.Dest)
-  .then((res)=> {
-    revgeocode(res[0],req.body.start,req.body.Dest);
-   // console.log(res[0].latitude);
-
-    
+  .then(async(result)=> {
+     await revgeocode(result[0],req.body.start,req.body.Dest).then(() =>{
+      res.redirect(301,'/returnToUser');}
+    );
+   
+   // console.log(res[0].latitude);    
   })
   .catch((err)=> {
     console.log(err);
-  });
-  
   })
+
+
+   
+  });
+
+  app.get('/returnToUser',function(req,res){
+      var bestparking=getBestParking(parking_rates);
+      console.log("bestt:",bestparking);
+      res.send("Redirected to User Page");
+
+  });
 
 
   app.post('/updateData',function(req,res){
