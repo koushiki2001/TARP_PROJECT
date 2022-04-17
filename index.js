@@ -104,14 +104,27 @@ function findFeasibleSpot(destination,check,reaching_day,reaching_time)
        console.log("close to 2 kms:"+check[i][3]+" "+distance+"\n");
      }
     }
-    var par = {Monday:1};
+    if(reaching_day=='Monday')
+    var par = {Monday:1,_id:0};
+    if(reaching_day=='Tuesday')
+    var par = {Tuesday:1,_id:0};
+    if(reaching_day=='Wednesday')
+    var par = {Wednesday:1,_id:0};
+    if(reaching_day=='Thursday')
+    var par = {Thursday:1,_id:0};
+    if(reaching_day=='Friday')
+    var par = {Friday:1,_id:0};
+    if(reaching_day=='Saturday')
+    var par = {Saturday:1,_id:0};
+    if(reaching_day=='Sunday')
+    var par = {Sunday:1,_id:0};
     console.log(chosenParking);
     for(var i=0;i<chosenParking.length;++i)
     {
     Occupancy.find({ID:chosenParking[i][3]},par)
     .then((rec) => {
       
-      console.log(rec[0]);
+      console.log(rec[0][reaching_day][reaching_time]);
 
     })
   
@@ -194,7 +207,7 @@ function revgeocode(destination,Start,Destination){
           .then(Park => {
             for(var i in Park)
         check.push([i, Park [i].Latitude,Park [i].Longitude,Park[i].ID,Park[i].Title]);        
-        findFeasibleSpot(destination,check,reaching_day,slots[reaching_slot]);
+        findFeasibleSpot(destination,check,reaching_day,reaching_slot);
           })
     });  
 
