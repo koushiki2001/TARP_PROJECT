@@ -18,8 +18,7 @@ const Park = require('./Models/ParkingSpots');
 const Occupancy = require('./Models/ParkingOccupancy');
 const crypto = require('crypto');
 var moment=require('moment');
-const csvFilePath='<path to csv file>' // Resource.csv in your case
-const csv=require('csvtojson') // Make sure you have this line in order to call functions from this modules
+
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyparser.urlencoded({extended: false}));
@@ -48,10 +47,7 @@ connection.once('open', () =>{
 
 const options = {
     provider: 'google',
-  
-    // Optional depending on the providers
-    
-    apiKey: 'AIzaSyBKoRGosqFTvjgbkIIdlEPfUhUYpYKCiQI', // for Mapquest, OpenCage, Google Premier
+    apiKey: 'AIzaSyBKoRGosqFTvjgbkIIdlEPfUhUYpYKCiQI', 
     
   };
 
@@ -69,7 +65,7 @@ async function getOccupancyRate(chosenParking,sumofOccupancy)
 {
   console.log("CP_LENGTH: ",chosenParking);
   console.log("Chosen parking inside get occupancy rate");
-  // for(var i=0;i<chosenParking.length;++i){
+  
   var parking_rates = []
   await Sensor.find({ParkingID:chosenParking})
   .then((sen)=>{
@@ -85,8 +81,9 @@ async function getOccupancyRate(chosenParking,sumofOccupancy)
 
   })
   
-  // }
+  
 }
+
 //Function to find the most feasible parking spot based on the user's current location
 async function findFeasibleSpot(destination,check,reaching_day,reaching_time)
 {
@@ -95,7 +92,6 @@ async function findFeasibleSpot(destination,check,reaching_day,reaching_time)
     var chosenParking = [];
     var from = turf.point([Number(destination.latitude),Number(destination.longitude)]);
     var options = {units: 'kilometers'};
- //console.log(check[0][1]);
     for(var i=0;i<check.length;i++){
      var to = turf.point([Number(check[i][1]), Number(check[i][2])]);
      var distance = turf.distance(from, to, options);
@@ -205,7 +201,6 @@ async function revgeocode(destination,Start,Destination){
         var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
        var reach_timestamp = reach_time.split(', ')[1];
        var reach_date = reach_time.split(', ')[0];
-        // var m = moment.unix(utc).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
         console.log("asia:",reach_time);
         console.log(reach_date);
         console.log(typeof(reach_time));
