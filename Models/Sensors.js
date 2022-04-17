@@ -8,9 +8,9 @@ const sensorSchema = new Schema({
     ID : {type:String,required:true},
     Latitude : {type: String, required: true},
     Longitude : {type: String, required: true},
+    ParkingID : {type:String, required:true},
     
         
-
 
 },
 {

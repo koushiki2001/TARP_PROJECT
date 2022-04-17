@@ -33,26 +33,6 @@ app.use(
   );
 
 
-  var parser = parse({columns: true}, function (err, records) {
-   
-    // console.log(records);
-      var int2day={
-        'Monday':'Monday Occupancy',
-        'Tuesday':'Tuesday Occupancy',
-        3:'Wednesday Occupancy',
-        4:'Thursday Occupancy',
-        5:'Friday Occupancy',
-        6:'Saturday Occupancy',
-        0:'Sunday Occupancy'
-      };
-      var d = new Date();
-      var n = d.getDay();
-      console.log(int2day[reaching_day]);
-
-      for(var i=0;i<records.length;i++){
-        console.log(records[i][int2day[n]]);
-      }
-  }); 
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
@@ -79,16 +59,36 @@ const options = {
     key: "AIzaSyBKoRGosqFTvjgbkIIdlEPfUhUYpYKCiQI"
   });
  
-var parkings=[];
-function storeparkings(p){
-  parkings.push(p);
-}
 
-function showparkings(){
-  console.log("parkingg:",parkings);
+function printparkings(pr)
+{
+  console.log("Inside print parkings",pr);
+}
+ 
+async function getOccupancyRate(chosenParking,sumofOccupancy)
+{
+  console.log("CP_LENGTH: ",chosenParking);
+  console.log("Chosen parking inside get occupancy rate");
+  // for(var i=0;i<chosenParking.length;++i){
+  var parking_rates = []
+  await Sensor.find({ParkingID:chosenParking})
+  .then((sen)=>{
+    var total = sen.length;
+    console.log("Length of chosen parking",total);
+    console.log("Sum of occupancy",sumofOccupancy);
+    var OccupancyRate = (sumofOccupancy/(120*total))*100;
+    console.log("The average occupancy rate is: ",OccupancyRate);
+    const pr = {"ID":chosenParking,"Rate":OccupancyRate};
+    parking_rates.push(pr);
+    printparkings(parking_rates);
+
+
+  })
+  
+  // }
 }
 //Function to find the most feasible parking spot based on the user's current location
-function findFeasibleSpot(destination,check,reaching_day,reaching_time)
+async function findFeasibleSpot(destination,check,reaching_day,reaching_time)
 {
     console.log("INSIDE RETURN FUNC");
 
@@ -99,7 +99,7 @@ function findFeasibleSpot(destination,check,reaching_day,reaching_time)
     for(var i=0;i<check.length;i++){
      var to = turf.point([Number(check[i][1]), Number(check[i][2])]);
      var distance = turf.distance(from, to, options);
-     if(distance<=2.0){
+     if(distance<=10.0){
          chosenParking.push(check[i]);
        console.log("close to 2 kms:"+check[i][3]+" "+distance+"\n");
      }
@@ -119,14 +119,23 @@ function findFeasibleSpot(destination,check,reaching_day,reaching_time)
     if(reaching_day=='Sunday')
     var par = {Sunday:1,_id:0};
     console.log(chosenParking);
+    var cpx;
     for(var i=0;i<chosenParking.length;++i)
     {
-    Occupancy.find({ID:chosenParking[i][3]},par)
-    .then((rec) => {
-      
-      console.log(rec[0][reaching_day][reaching_time]);
 
-    })
+      cpx=chosenParking[i][3];
+      console.log('cpx',cpx);
+    await Occupancy.find({ID:chosenParking[i][3]},par)
+    .then((rec) => {
+      const occupancy = rec[0][reaching_day][reaching_time]
+      console.log(rec[0][reaching_day][reaching_time]);
+      console.log("hidifdin",i);
+
+      getOccupancyRate(cpx,occupancy);
+
+
+
+    });
   
   }
   console.log("rday",reaching_day);
@@ -135,14 +144,14 @@ function findFeasibleSpot(destination,check,reaching_day,reaching_time)
 }
 
 //function to get the sensor data
-function revgeocode(destination,Start,Destination){
+async function revgeocode(destination,Start,Destination){
 
   googleMapsClient.directions({
     origin: Start,
     destination: Destination,
     mode: 'driving',
       
-    }, function(err, response) {
+    }, async function(err, response) {
       
        const utc =new Date().toUTCString();
     
@@ -203,7 +212,7 @@ function revgeocode(destination,Start,Destination){
 
   console.log("here:"+destination.latitude+" "+destination.longitude);
   let check = [];
-  Park.find()
+  await Park.find()
           .then(Park => {
             for(var i in Park)
         check.push([i, Park [i].Latitude,Park [i].Longitude,Park[i].ID,Park[i].Title]);        
