@@ -143,6 +143,35 @@ async function findFeasibleSpot(destination,check,reaching_day,reaching_time)
     
 }
 
+async function get_slot(reach_timestamp){
+  var reaching_slot;
+  if(reach_timestamp>='00:00' && reach_timestamp<='2:00')
+  reaching_slot = 0;
+  if(reach_timestamp>='2:00' && reach_timestamp<='4:00')
+  reaching_slot = 1;
+  if(reach_timestamp>='4:00' && reach_timestamp<='6:00')
+  reaching_slot = 2;
+  if(reach_timestamp>='6:00' && reach_timestamp<'8:00')
+  reaching_slot = 3;
+  if(reach_timestamp>='8:00' && reach_timestamp<'10:00')
+  reaching_slot = 4;
+  if(reach_timestamp>='10:00' && reach_timestamp<'12:00')
+  reaching_slot = 5;
+  if(reach_timestamp>='12:00' && reach_timestamp<'14:00')
+  reaching_slot = 6;
+  if(reach_timestamp>='14:00' && reach_timestamp<'16:00')
+  reaching_slot = 7;
+  if(reach_timestamp>='16:00' && reach_timestamp<'18:00')
+  reaching_slot = 8;
+  if(reach_timestamp>='18:00' && reach_timestamp<'20:00')
+  reaching_slot = 9;
+  if(reach_timestamp>='20:00' && reach_timestamp<'22:00')
+  reaching_slot = 10;
+  if(reach_timestamp>='22:00' && reach_timestamp<'00:00')
+  reaching_slot = 11;
+
+  return reaching_slot;
+}
 //function to get the sensor data
 async function revgeocode(destination,Start,Destination){
 
@@ -182,31 +211,7 @@ async function revgeocode(destination,Start,Destination){
         console.log(typeof(reach_time));
         const date = moment(reach_date);
         reaching_day = days[date.day()];
-        var reaching_slot;
-        if(reach_timestamp>='00:00' && reach_timestamp<='2:00')
-        reaching_slot = 0;
-        if(reach_timestamp>='2:00' && reach_timestamp<='4:00')
-        reaching_slot = 1;
-        if(reach_timestamp>='4:00' && reach_timestamp<='6:00')
-        reaching_slot = 2;
-        if(reach_timestamp>='6:00' && reach_timestamp<'8:00')
-        reaching_slot = 3;
-        if(reach_timestamp>='8:00' && reach_timestamp<'10:00')
-        reaching_slot = 4;
-        if(reach_timestamp>='10:00' && reach_timestamp<'12:00')
-        reaching_slot = 5;
-        if(reach_timestamp>='12:00' && reach_timestamp<'14:00')
-        reaching_slot = 6;
-        if(reach_timestamp>='14:00' && reach_timestamp<'16:00')
-        reaching_slot = 7;
-        if(reach_timestamp>='16:00' && reach_timestamp<'18:00')
-        reaching_slot = 8;
-        if(reach_timestamp>='18:00' && reach_timestamp<'20:00')
-        reaching_slot = 9;
-        if(reach_timestamp>='20:00' && reach_timestamp<'22:00')
-        reaching_slot = 10;
-        if(reach_timestamp>='22:00' && reach_timestamp<'00:00')
-        reaching_slot = 11;
+        var reaching_slot=await get_slot(reach_timestamp);
         console.log("The person will reach on "+reaching_day+" in the time slot "+slots[reaching_slot]);
    
 
