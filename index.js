@@ -88,7 +88,7 @@ function showparkings(){
   console.log("parkingg:",parkings);
 }
 //Function to find the most feasible parking spot based on the user's current location
-function findFeasibleSpot(destination,check,reaching_day)
+function findFeasibleSpot(destination,check,reaching_day,reaching_time)
 {
     console.log("INSIDE RETURN FUNC");
 
@@ -104,23 +104,26 @@ function findFeasibleSpot(destination,check,reaching_day)
        console.log("close to 2 kms:"+check[i][3]+" "+distance+"\n");
      }
     }
+    var par = {Monday:1};
     console.log(chosenParking);
     for(var i=0;i<chosenParking.length;++i)
     {
-    Occupancy.find({ID:chosenParking[i][3]})
+    Occupancy.find({ID:chosenParking[i][3]},par)
     .then((rec) => {
-      const jsonrec = rec.toString();
-      console.log(jsonrec);
+      
+      console.log(rec[0]);
+
     })
   
   }
+  console.log("rday",reaching_day);
+  console.log("rtime",reaching_time);
     
 }
 
 //function to get the sensor data
 function revgeocode(destination,Start,Destination){
 
-  var reaching_day ;
   googleMapsClient.directions({
     origin: Start,
     destination: Destination,
@@ -144,6 +147,7 @@ function revgeocode(destination,Start,Destination){
          10:'8pm-10pm',
          11:'10pm-12am'
        }
+       var reaching_day ;
 
        var curtime= moment();
        var reach_time=moment(curtime).add(Number(response.json.routes[0].legs[0].duration.value/(60*60)), 'hours').format('YYYY-MM-DD, h:mm:ss a');  // see the cloning?
@@ -182,7 +186,7 @@ function revgeocode(destination,Start,Destination){
         if(reach_timestamp>='22:00' && reach_timestamp<'00:00')
         reaching_slot = 11;
         console.log("The person will reach on "+reaching_day+" in the time slot "+slots[reaching_slot]);
-    });  
+   
 
   console.log("here:"+destination.latitude+" "+destination.longitude);
   let check = [];
@@ -190,8 +194,9 @@ function revgeocode(destination,Start,Destination){
           .then(Park => {
             for(var i in Park)
         check.push([i, Park [i].Latitude,Park [i].Longitude,Park[i].ID,Park[i].Title]);        
-        findFeasibleSpot(destination,check,reaching_day);
+        findFeasibleSpot(destination,check,reaching_day,slots[reaching_slot]);
           })
+    });  
 
 }
   
