@@ -16,6 +16,8 @@ const Sensor = require('./Models/Sensors');
 const Park = require('./Models/ParkingSpots');
 const crypto = require('crypto');
 var moment=require('moment');
+const csvFilePath='<path to csv file>' // Resource.csv in your case
+const csv=require('csvtojson') // Make sure you have this line in order to call functions from this modules
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyparser.urlencoded({extended: false}));
@@ -33,8 +35,8 @@ app.use(
    
     // console.log(records);
       var int2day={
-        1:'Monday Occupancy',
-        2:'Tuesday Occupancy',
+        'Monday':'Monday Occupancy',
+        'Tuesday':'Tuesday Occupancy',
         3:'Wednesday Occupancy',
         4:'Thursday Occupancy',
         5:'Friday Occupancy',
@@ -43,18 +45,11 @@ app.use(
       };
       var d = new Date();
       var n = d.getDay();
-      console.log(int2day[n]);
+      console.log(int2day[reaching_day]);
 
       for(var i=0;i<records.length;i++){
         console.log(records[i][int2day[n]]);
       }
-
-
-
-
-
-
-
   }); 
 
 app.set('view engine', 'ejs');
@@ -81,9 +76,17 @@ const options = {
   var googleMapsClient = require('@google/maps').createClient({
     key: "AIzaSyBKoRGosqFTvjgbkIIdlEPfUhUYpYKCiQI"
   });
+ 
+var parkings=[];
+function storeparkings(p){
+  parkings.push(p);
+}
 
+function showparkings(){
+  console.log("parkingg:",parkings);
+}
 //Function to find the most feasible parking spot based on the user's current location
-function findFeasibleSpot(destination,check)
+function findFeasibleSpot(destination,check,reaching_day)
 {
     console.log("INSIDE RETURN FUNC");
 
@@ -101,26 +104,96 @@ function findFeasibleSpot(destination,check)
     }
     console.log(chosenParking);
 
-    
-  
+    var parkingdatas=[];
     for(var i=0;i<chosenParking.length;++i){
     filepath=__dirname+"/public/static/PARKING DATA/lat_"+chosenParking[0][1]+"_lon_"+chosenParking[0][2]+".csv";
-    fs.createReadStream(filepath).pipe(parser);
+  //  fs.createReadStream(filepath).pipe(parser);
+    csv()
+    .fromFile(filepath)
+    .then((jsonObj)=>{
+     //   console.log(jsonObj);
+      //  storeparkings(jsonObj);
+      parkingdatas.push(jsonObj);
+    })
     }
-
-
-    
+    //showparkings();
+    console.log("pp:",parkingdatas);
 }
 
 //function to get the sensor data
-function revgeocode(destination){
+function revgeocode(destination,Start,Destination){
+
+  var reaching_day ;
+  googleMapsClient.directions({
+    origin: Start,
+    destination: Destination,
+    mode: 'driving',
+      
+    }, function(err, response) {
+      
+       const utc =new Date().toUTCString();
+    
+       var slots = {
+         0:'12am-2am',
+         1:'2am-4am',
+         2:'4am-6am',
+         3:'6am-8am',
+         4:'8am-10am',
+         5:'10am-12pm',
+         6:'12pm-2pm',
+         7:'2pm-4pm',
+         8:'4pm-6pm',
+         9:'6pm-8pm',
+         10:'8pm-10pm',
+         11:'10pm-12am'
+       }
+
+       var curtime= moment();
+       var reach_time=moment(curtime).add(Number(response.json.routes[0].legs[0].duration.value/(60*60)), 'hours').format('YYYY-MM-DD, h:mm:ss a');  // see the cloning?
+        var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+       var reach_timestamp = reach_time.split(', ')[1];
+       var reach_date = reach_time.split(', ')[0];
+        // var m = moment.unix(utc).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+        console.log("asia:",reach_time);
+        console.log(reach_date);
+        console.log(typeof(reach_time));
+        const date = moment(reach_date);
+        reaching_day = days[date.day()];
+        var reaching_slot;
+        if(reach_timestamp>='00:00' && reach_timestamp<='2:00')
+        reaching_slot = 0;
+        if(reach_timestamp>='2:00' && reach_timestamp<='4:00')
+        reaching_slot = 1;
+        if(reach_timestamp>='4:00' && reach_timestamp<='6:00')
+        reaching_slot = 2;
+        if(reach_timestamp>='6:00' && reach_timestamp<'8:00')
+        reaching_slot = 3;
+        if(reach_timestamp>='8:00' && reach_timestamp<'10:00')
+        reaching_slot = 4;
+        if(reach_timestamp>='10:00' && reach_timestamp<'12:00')
+        reaching_slot = 5;
+        if(reach_timestamp>='12:00' && reach_timestamp<'14:00')
+        reaching_slot = 6;
+        if(reach_timestamp>='14:00' && reach_timestamp<'16:00')
+        reaching_slot = 7;
+        if(reach_timestamp>='16:00' && reach_timestamp<'18:00')
+        reaching_slot = 8;
+        if(reach_timestamp>='18:00' && reach_timestamp<'20:00')
+        reaching_slot = 9;
+        if(reach_timestamp>='20:00' && reach_timestamp<'22:00')
+        reaching_slot = 10;
+        if(reach_timestamp>='22:00' && reach_timestamp<'00:00')
+        reaching_slot = 11;
+        console.log("The person will reach on "+reaching_day+" in the time slot "+slots[reaching_slot]);
+    });  
+
   console.log("here:"+destination.latitude+" "+destination.longitude);
   let check = [];
   Park.find()
           .then(Park => {
             for(var i in Park)
         check.push([i, Park [i].Latitude,Park [i].Longitude,Park[i].ID,Park[i].Title]);        
-        findFeasibleSpot(destination,check);
+        findFeasibleSpot(destination,check,reaching_day);
           })
 
 }
@@ -145,75 +218,12 @@ app.get('/parking',function(req,res){
   app.post('/destination',function(req,res){
       console.log(req.body.Dest);
       console.log(req.body.start);
-      
-      googleMapsClient.directions({
-        origin: req.body.start,
-        destination: req.body.Dest,
-        mode: 'driving',
-          
-        }, function(err, response) {
-          
-           const utc =new Date().toUTCString();
-          
 
-           var slots = {
-             0:'12am-2am',
-             1:'2am-4am',
-             2:'4am-6am',
-             3:'6am-8am',
-             4:'8am-10am',
-             5:'10am-12pm',
-             6:'12pm-2pm',
-             7:'2pm-4pm',
-             8:'4pm-6pm',
-             9:'6pm-8pm',
-             10:'8pm-10pm',
-             11:'10pm-12am'
-           }
-
-           var curtime= moment();
-           var reach_time=moment(curtime).add(Number(response.json.routes[0].legs[0].duration.value/(60*60)), 'hours').format('YYYY-MM-DD, h:mm:ss a');  // see the cloning?
-            var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-           var reach_timestamp = reach_time.split(', ')[1];
-           var reach_date = reach_time.split(', ')[0];
-            // var m = moment.unix(utc).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
-            console.log("asia:",reach_time);
-            console.log(reach_date);
-            console.log(typeof(reach_time));
-            const date = moment(reach_date);
-            const reaching_day = days[date.day()];
-            var reaching_slot;
-            if(reach_timestamp>='00:00' && reach_timestamp<='2:00')
-            reaching_slot = 0;
-            if(reach_timestamp>='2:00' && reach_timestamp<='4:00')
-            reaching_slot = 1;
-            if(reach_timestamp>='4:00' && reach_timestamp<='6:00')
-            reaching_slot = 2;
-            if(reach_timestamp>='6:00' && reach_timestamp<'8:00')
-            reaching_slot = 3;
-            if(reach_timestamp>='8:00' && reach_timestamp<'10:00')
-            reaching_slot = 4;
-            if(reach_timestamp>='10:00' && reach_timestamp<'12:00')
-            reaching_slot = 5;
-            if(reach_timestamp>='12:00' && reach_timestamp<'14:00')
-            reaching_slot = 6;
-            if(reach_timestamp>='14:00' && reach_timestamp<'16:00')
-            reaching_slot = 7;
-            if(reach_timestamp>='16:00' && reach_timestamp<'18:00')
-            reaching_slot = 8;
-            if(reach_timestamp>='18:00' && reach_timestamp<'20:00')
-            reaching_slot = 9;
-            if(reach_timestamp>='20:00' && reach_timestamp<'22:00')
-            reaching_slot = 10;
-            if(reach_timestamp>='22:00' && reach_timestamp<'00:00')
-            reaching_slot = 11;
-            console.log("The person will reach on "+reaching_day+" in the time slot "+slots[reaching_slot]);
-        });  
       const geoCoder = NodeGeocoder(options);
       
       geoCoder.geocode(req.body.Dest)
   .then((res)=> {
-    revgeocode(res[0]);
+    revgeocode(res[0],req.body.start,req.body.Dest);
    // console.log(res[0].latitude);
 
     
