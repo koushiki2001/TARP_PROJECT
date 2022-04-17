@@ -56,17 +56,22 @@ const options = {
   });
  
 
+
 function printparkings(pr)
 {
   console.log("Inside print parkings",pr);
 }
  
+
+var parking_rates = [];
+
+
 async function getOccupancyRate(chosenParking,sumofOccupancy)
 {
   console.log("CP_LENGTH: ",chosenParking);
   console.log("Chosen parking inside get occupancy rate");
   
-  var parking_rates = []
+  // var parking_rates = []
   await Sensor.find({ParkingID:chosenParking})
   .then((sen)=>{
     var total = sen.length;
@@ -84,6 +89,48 @@ async function getOccupancyRate(chosenParking,sumofOccupancy)
   
 }
 
+async function getBestParking(parking_rates){
+
+  console.log("parking rates",parking_rates);
+  var rates = [];
+
+  for(var i=0;i<parking_rates.length;++i)
+  {
+    rates.push(parking_rates[i]['Rate']);
+  }
+  var min = rates[0];
+  var minID = '' ;
+  console.log('min',min);
+  for(var i=0;i<parking_rates.length;++i)
+  {
+    if(parking_rates[i]['Rate']<=min)
+   {min = parking_rates[i]['Rate'];
+   minID = parking_rates[i]['ID'];}
+  }
+  
+  return minID;
+}
+
+async function callChosenParking(chosenParking,reaching_day,reaching_time,par){
+  for(var i=0;i<chosenParking.length;++i)
+    {
+
+      cpx=chosenParking[i][3];
+      
+    await Occupancy.find({ID:chosenParking[i][3]},par)
+    
+    .then(async (rec) => {
+      console.log('cpx',cpx);
+      const occupancy = rec[0][reaching_day][reaching_time]
+      console.log(rec[0][reaching_day][reaching_time]);
+      console.log("hidifdin",i);
+
+      await getOccupancyRate(cpx,occupancy);
+
+    });
+
+  }
+}
 //Function to find the most feasible parking spot based on the user's current location
 async function findFeasibleSpot(destination,check,reaching_day,reaching_time)
 {
@@ -116,26 +163,11 @@ async function findFeasibleSpot(destination,check,reaching_day,reaching_time)
     var par = {Sunday:1,_id:0};
     console.log(chosenParking);
     var cpx;
-    for(var i=0;i<chosenParking.length;++i)
-    {
-
-      cpx=chosenParking[i][3];
-      console.log('cpx',cpx);
-    await Occupancy.find({ID:chosenParking[i][3]},par)
-    .then((rec) => {
-      const occupancy = rec[0][reaching_day][reaching_time]
-      console.log(rec[0][reaching_day][reaching_time]);
-      console.log("hidifdin",i);
-
-      getOccupancyRate(cpx,occupancy);
-
-
-
-    });
   
-  }
-  console.log("rday",reaching_day);
-  console.log("rtime",reaching_time);
+  await callChosenParking(chosenParking,reaching_day,reaching_time,par);
+  let res =  await getBestParking(parking_rates);
+    console.log("From best parking func ",res);
+  
     
 }
 
