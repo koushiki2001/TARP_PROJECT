@@ -15,6 +15,7 @@ const turf= require('@turf/turf');
 const req = require('express/lib/request');
 const Sensor = require('./Models/Sensors');
 const Park = require('./Models/ParkingSpots');
+const Occupancy = require('./Models/ParkingOccupancy');
 const crypto = require('crypto');
 var moment=require('moment');
 const csvFilePath='<path to csv file>' // Resource.csv in your case
@@ -104,21 +105,16 @@ function findFeasibleSpot(destination,check,reaching_day)
      }
     }
     console.log(chosenParking);
-
-    var parkingdatas=[];
-    for(var i=0;i<chosenParking.length;++i){
-    filepath=__dirname+"/public/static/PARKING DATA/lat_"+chosenParking[0][1]+"_lon_"+chosenParking[0][2]+".csv";
-  //  fs.createReadStream(filepath).pipe(parser);
-    csv()
-    .fromFile(filepath)
-    .then((jsonObj)=>{
-     //   console.log(jsonObj);
-      //  storeparkings(jsonObj);
-      parkingdatas.push(jsonObj);
+    for(var i=0;i<chosenParking.length;++i)
+    {
+    Occupancy.find({ID:chosenParking[i][3]})
+    .then((rec) => {
+      const jsonrec = rec.toString();
+      console.log(jsonrec);
     })
-    }
-    //showparkings();
-    console.log("pp:",parkingdatas);
+  
+  }
+    
 }
 
 //function to get the sensor data
@@ -212,10 +208,31 @@ app.get('/parking',function(req,res){
   res.render("parkingDetails"); 
   });
 
+  app.get('/parkingOccupancyData',function(req,res){
+    res.render("enterParkingOccupancy"); 
+    });
+
 
   app.get('/getDestination',function(req,res){
     res.render("destination"); 
   });
+
+app.post('/updateParkingOccupancy',function(req,res){
+  const ID = req.body.ID;
+  const Monday = req.body.Monday.split(',');
+  const Tuesday = req.body.Tuesday.split(',');
+  const Wednesday = req.body.Wednesday.split(',');
+  const Thursday = req.body.Thursday.split(',');
+  const Friday = req.body.Friday.split(',');
+  const Saturday = req.body.Saturday.split(',');
+  const Sunday = req.body.Sunday.split(',');
+
+  const newOccupancy = new Occupancy({ID,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday});
+  newOccupancy.save()
+  .then(()=> res.json('Occupancy data added'))
+  .catch(err => res.status(400).json('Error: '+err));
+});
+
   app.post('/destination',function(req,res){
       console.log(req.body.Dest);
       console.log(req.body.start);
