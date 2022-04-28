@@ -311,16 +311,20 @@ app.post('/updateParkingOccupancy',function(req,res){
     console.log(err);
   })
 
-
-   
   });
 
-  app.get('/returnToUser',function(req,res){
+  app.get('/returnToUser',async function(req,res){
       setTimeout(function () {
         console.log("5 secondes"); 
         console.log("now");
         console.log("bestt 1234:",bestparking);
-        res.render("home");
+         Park.findOne({ID:bestparking})
+        .then(Park => {
+            //check.push([i, Park [i].Latitude,Park [i].Longitude,Park[i].ID,Park[i].Title]);
+           // console.log("parking found:",Park.Longitude," ",Park.Latitude);
+           res.render("displaytoUser",{'lon':Park.Longitude,'lat':Park.Latitude});
+        })
+
       }, 7000); 
 
   });
