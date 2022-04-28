@@ -9,9 +9,6 @@ const sensorSchema = new Schema({
     Latitude : {type: String, required: true},
     Longitude : {type: String, required: true},
     ParkingID : {type:String, required:true},
-    
-        
-
 },
 {
     timestamps: true,
