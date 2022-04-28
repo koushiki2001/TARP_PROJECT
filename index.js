@@ -64,7 +64,7 @@ function printparkings(pr)
  
 
 var parking_rates = [];
-
+var bestparking;
 
 async function getOccupancyRate(chosenParking,sumofOccupancy)
 {
@@ -167,6 +167,8 @@ async function findFeasibleSpot(destination,check,reaching_day,reaching_time)
   await callChosenParking(chosenParking,reaching_day,reaching_time,par);
   let res =  await getBestParking(parking_rates);
     console.log("From best parking func ",res);
+    bestparking=  await getBestParking(parking_rates);
+    console.log("bestt:",bestparking);
   
     
 }
@@ -245,10 +247,10 @@ async function revgeocode(destination,Start,Destination){
   console.log("here:"+destination.latitude+" "+destination.longitude);
   let check = [];
   await Park.find()
-          .then(Park => {
+          .then(async Park => {
             for(var i in Park)
         check.push([i, Park [i].Latitude,Park [i].Longitude,Park[i].ID,Park[i].Title]);        
-        findFeasibleSpot(destination,check,reaching_day,reaching_slot);
+        await findFeasibleSpot(destination,check,reaching_day,reaching_slot);
           })
     });  
 
@@ -257,7 +259,6 @@ async function revgeocode(destination,Start,Destination){
 app.get('/',function(req,res){
     res.render("home"); 
   });
-
 
 app.get('/sensor',function(req,res){
 res.render("form"); 
@@ -270,7 +271,6 @@ app.get('/parking',function(req,res){
   app.get('/parkingOccupancyData',function(req,res){
     res.render("enterParkingOccupancy"); 
     });
-
 
   app.get('/getDestination',function(req,res){
     res.render("destination"); 
@@ -301,7 +301,8 @@ app.post('/updateParkingOccupancy',function(req,res){
       geoCoder.geocode(req.body.Dest)
   .then(async(result)=> {
      await revgeocode(result[0],req.body.start,req.body.Dest).then(() =>{
-      res.redirect(301,'/returnToUser');}
+       res.redirect('/returnToUser');
+    }
     );
    
    // console.log(res[0].latitude);    
@@ -315,9 +316,12 @@ app.post('/updateParkingOccupancy',function(req,res){
   });
 
   app.get('/returnToUser',function(req,res){
-      var bestparking=getBestParking(parking_rates);
-      console.log("bestt:",bestparking);
-      res.send("Redirected to User Page");
+      setTimeout(function () {
+        console.log("5 secondes"); 
+        console.log("now");
+        console.log("bestt 1234:",bestparking);
+        res.render("home");
+      }, 7000); 
 
   });
 
