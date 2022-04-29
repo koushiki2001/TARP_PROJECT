@@ -37,13 +37,13 @@ app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 const uri = `mongodb+srv://parkonthego:parkonthego@cluster0.2uafm.mongodb.net/parkonthegoDB?retryWrites=true&w=majority`;
 
-mongoose.connect(uri, { useUnifiedTopology: true } 
-    );
+// mongoose.connect(uri, { useUnifiedTopology: true } 
+//     );
 
-const connection = mongoose.connection;
-connection.once('open', () =>{
-    console.log("MongoDB database connection successfully established");
-});
+// const connection = mongoose.connection;
+// connection.once('open', () =>{
+//     console.log("MongoDB database connection successfully established");
+// });
 
 const options = {
     provider: 'google',
