@@ -142,9 +142,9 @@ async function findFeasibleSpot(destination,check,reaching_day,reaching_time)
     for(var i=0;i<check.length;i++){
      var to = turf.point([Number(check[i][1]), Number(check[i][2])]);
      var distance = turf.distance(from, to, options);
-     if(distance<=10.0){
+     if(distance<=1.0){
          chosenParking.push(check[i]);
-       console.log("close to 2 kms:"+check[i][3]+" "+distance+"\n");
+       console.log("close to 1 kms:"+check[i][3]+" "+distance+"\n");
      }
     }
     if(reaching_day=='Monday')
@@ -235,13 +235,13 @@ async function revgeocode(destination,Start,Destination){
         var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
        var reach_timestamp = reach_time.split(', ')[1];
        var reach_date = reach_time.split(', ')[0];
-        console.log("asia:",reach_time);
-        console.log(reach_date);
-        console.log(typeof(reach_time));
+        console.log("Time at which the person reaches the destination:",reach_time);
+        // console.log("Reaching day",reach_date);
+        // console.log(typeof(reach_time));
         const date = moment(reach_date);
         reaching_day = days[date.day()];
         var reaching_slot=await get_slot(reach_timestamp);
-        console.log("The person will reach on "+reaching_day+" in the time slot "+slots[reaching_slot]);
+        console.log("Converted: The person will reach on "+reaching_day+" in the time slot "+slots[reaching_slot]);
    
 
   console.log("here:"+destination.latitude+" "+destination.longitude);
@@ -293,8 +293,10 @@ app.post('/updateParkingOccupancy',function(req,res){
 });
 
   app.post('/destination',async function(req,res){
-      console.log(req.body.Dest);
-      console.log(req.body.start);
+
+    console.log("Start: ",req.body.start);
+      console.log("Destination: ",req.body.Dest);
+      
 
       const geoCoder = NodeGeocoder(options);
       
