@@ -255,10 +255,21 @@ async function revgeocode(destination,Start,Destination){
     });  
 
 }
-  
-app.get('/',function(req,res){
-    res.render("home"); 
-  });
+
+  app.get('/',async function(req,res){
+
+    try {
+      await mongoose.connect(uri, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+      });
+      console.log('\n Server connected to MongoDB Atlas!');
+      res.render("home"); 
+  } catch (err) {
+      throw new DbConnectionError();
+  }
+   
+});
 
 app.get('/sensor',function(req,res){
 res.render("form"); 
