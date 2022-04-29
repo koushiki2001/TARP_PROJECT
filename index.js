@@ -91,7 +91,7 @@ async function getOccupancyRate(chosenParking,sumofOccupancy)
 
 async function getBestParking(parking_rates){
 
-  console.log("parking rates",parking_rates);
+  
   var rates = [];
 
   for(var i=0;i<parking_rates.length;++i)
@@ -100,7 +100,7 @@ async function getBestParking(parking_rates){
   }
   var min = rates[0];
   var minID = '' ;
-  console.log('min',min);
+  
   for(var i=0;i<parking_rates.length;++i)
   {
     if(parking_rates[i]['Rate']<=min)
@@ -120,10 +120,10 @@ async function callChosenParking(chosenParking,reaching_day,reaching_time,par){
     await Occupancy.find({ID:chosenParking[i][3]},par)
     
     .then(async (rec) => {
-      console.log('cpx',cpx);
+    
       const occupancy = rec[0][reaching_day][reaching_time]
       console.log(rec[0][reaching_day][reaching_time]);
-      console.log("hidifdin",i);
+    
 
       await getOccupancyRate(cpx,occupancy);
 
@@ -166,7 +166,7 @@ async function findFeasibleSpot(destination,check,reaching_day,reaching_time)
   
   await callChosenParking(chosenParking,reaching_day,reaching_time,par);
   let res =  await getBestParking(parking_rates);
-    console.log("From best parking func ",res);
+    
     bestparking=  await getBestParking(parking_rates);
     console.log("bestt:",bestparking);
   
@@ -315,13 +315,9 @@ app.post('/updateParkingOccupancy',function(req,res){
 
   app.get('/returnToUser',async function(req,res){
       setTimeout(function () {
-        console.log("5 secondes"); 
-        console.log("now");
-        console.log("bestt 1234:",bestparking);
+        console.log("chosen parking id:",bestparking);
          Park.findOne({ID:bestparking})
         .then(Park => {
-            //check.push([i, Park [i].Latitude,Park [i].Longitude,Park[i].ID,Park[i].Title]);
-           // console.log("parking found:",Park.Longitude," ",Park.Latitude);
            res.render("displaytoUser",{'lon':Park.Longitude,'lat':Park.Latitude});
         })
 
