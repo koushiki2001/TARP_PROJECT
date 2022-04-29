@@ -333,8 +333,7 @@ app.post('/updateParkingOccupancy',function(req,res){
         .then(Park => {
            res.render("displaytoUser",{'lon':Park.Longitude,'lat':Park.Latitude});
         })
-
-      }, 7000); 
+      }, 10000); 
 
   });
 
